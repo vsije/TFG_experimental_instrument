@@ -1,0 +1,185 @@
+<script>
+  
+  // Objecte JS per emmagatzemar respostes
+  var resultats = {
+    'id_participant': new Date().getTime(), // ID anònim simple
+    'grup_experimental': null
+    // (Les altres dades s'afegiran aquí dinàmicament)
+  };
+
+  // ----- FUNCIONS DE NAVEGACIÓ I LÒGICA -----
+
+  function mostrarSeccio(idSeccio) {
+    var seccions = document.querySelectorAll('.seccio');
+    seccions.forEach(function(el) {
+      el.style.display = 'none';
+    });
+    document.getElementById(idSeccio).style.display = 'block';
+    // Si anem a dalt de tot de la pàgina en canviar de secció (millora UX mòbil)
+    window.scrollTo(0, 0);
+  }
+
+  // SECCIÓ 2: VALIDACIÓ I RECOLLIDA (CORREGIDA)
+  function validarIContinuarS2() {
+    var form = document.getElementById('form_seccio2');
+    if (!form.checkValidity()) {
+      alert("Si us plau, respon a totes les preguntes abans de continuar.");
+      form.reportValidity(); 
+      return;
+    }
+
+    // Dades Demogràfiques
+    resultats.s2_edat = document.getElementById('s2_edat').value;
+    resultats.s2_sexe = document.querySelector('input[name="s2_sexe"]:checked').value;
+    resultats.s2_estudis = document.getElementById('s2_estudis').value;
+    
+    if (document.getElementById('s2_ideologia_nsc').checked) {
+      resultats.s2_ideologia = 'NSC';
+    } else {
+      resultats.s2_ideologia = document.getElementById('s2_ideologia').value;
+    }
+    
+    // --- CORRECCIÓ CLAU AQUÍ ---
+    // Ara els noms de l'objecte (resultats.X) coincideixen amb el Code.gs
+    
+    // Educació
+    resultats.s2_likert_educacio1 = document.querySelector('input[name="s2_likert_educacio1"]:checked').value;
+    resultats.s2_likert_educacio2 = document.querySelector('input[name="s2_likert_educacio2"]:checked').value;
+    
+    // Immigració
+    resultats.s2_likert_immi1 = document.querySelector('input[name="s2_likert_immi1"]:checked').value;
+    resultats.s2_likert_immi2 = document.querySelector('input[name="s2_likert_immi2"]:checked').value;
+
+    assignarGrupIContinuar();
+  }
+
+  // SECCIÓ 3: PREPARACIÓ DEL POST-TEST
+  function prepararIContinuarS3() {
+    // Ocultem els dos blocs per defecte
+    document.getElementById('posttest_bloc_educacio').style.display = 'none';
+    document.getElementById('posttest_bloc_immi').style.display = 'none';
+
+    // Mostrem el bloc corresponent segons el grup assignat
+    if (resultats.grup_experimental === 'A1' || resultats.grup_experimental === 'B1') {
+      document.getElementById('posttest_bloc_educacio').style.display = 'block';
+    } else {
+      document.getElementById('posttest_bloc_immi').style.display = 'block';
+    }
+
+    mostrarSeccio('seccio4_posttest');
+  }
+
+  // SECCIÓ 4: RECOLLIDA POST-TEST (AMB CONFIANÇA)
+  function validarIContinuarS4() {
+    var form;
+    
+    // 1. Determinem quin formulari validar
+    if (resultats.grup_experimental === 'A1' || resultats.grup_experimental === 'B1') {
+      form = document.getElementById('form_seccio4_educacio');
+    } else {
+      form = document.getElementById('form_seccio4_immi');
+    }
+  
+    // 2. Validació
+    if (!form.checkValidity()) {
+      alert("Si us plau, respon a totes les preguntes abans de continuar.");
+      form.reportValidity();
+      return;
+    }
+  
+    // 3. Recollida de Dades (Unifiquem noms per al Sheet)
+    if (resultats.grup_experimental === 'A1' || resultats.grup_experimental === 'B1') {
+      // CAS: EDUCACIÓ
+      resultats.s4_comprensio = document.querySelector('input[name="s4_comp_educacio"]:checked').value;
+      resultats.s4_percep_claredat = document.querySelector('input[name="s4_percep_educacio_claredat"]:checked').value;
+      resultats.s4_percep_confianca = document.querySelector('input[name="s4_percep_educacio_confianca"]:checked').value; // NOVA
+      resultats.s4_percep_paraules = document.getElementById('s4_percep_educacio_paraules').value;
+      resultats.s4_post_item1 = document.querySelector('input[name="s4_post_educacio1"]:checked').value;
+      resultats.s4_post_item2 = document.querySelector('input[name="s4_post_educacio2"]:checked').value;
+    
+    } else {
+      // CAS: IMMIGRACIÓ
+      resultats.s4_comprensio = document.querySelector('input[name="s4_comp_immi"]:checked').value;
+      resultats.s4_percep_claredat = document.querySelector('input[name="s4_percep_immi_claredat"]:checked').value;
+      resultats.s4_percep_confianca = document.querySelector('input[name="s4_percep_immi_confianca"]:checked').value; // NOVA
+      resultats.s4_percep_paraules = document.getElementById('s4_percep_immi_paraules').value;
+      resultats.s4_post_item1 = document.querySelector('input[name="s4_post_immi1"]:checked').value;
+      resultats.s4_post_item2 = document.querySelector('input[name="s4_post_immi2"]:checked').value;
+    }
+  
+    // 4. Passem a la Secció 5
+    mostrarSeccio('seccio5_memoria');
+  }
+
+  // SECCIÓ 5: RECOLLIDA MEMÒRIA
+  function validarIContinuarS5() {
+    var form = document.getElementById('form_seccio5');
+    if (!form.checkValidity()) {
+      alert("Si us plau, intenta respondre amb el que recordis, encara que sigui poc.");
+      form.reportValidity();
+      return;
+    }
+
+    resultats.s5_record_tema = document.getElementById('s5_record_tema').value;
+    resultats.s5_record_visual = document.getElementById('s5_record_visual').value;
+
+    mostrarSeccio('seccio6_debriefing');
+  }
+
+  // RANDOMITZACIÓ (Nucli de l'experiment)
+  function assignarGrupIContinuar() {
+    var grupAssignat;
+    var imatgeUrl;
+    
+    // Randomització 50% Tema (Educació vs Immigració)
+    if (Math.random() < 0.5) {
+      // Educació
+      if (Math.random() < 0.5) {
+        grupAssignat = 'A1'; imatgeUrl = IMATGES.A1; // Control Educació
+      } else {
+        grupAssignat = 'B1'; imatgeUrl = IMATGES.B1; // Persuasiu Educació
+      }
+    } else {
+      // Immigració
+      if (Math.random() < 0.5) {
+        grupAssignat = 'A2'; imatgeUrl = IMATGES.A2; // Control Immigració
+      } else {
+        grupAssignat = 'B2'; imatgeUrl = IMATGES.B2; // Persuasiu Immigració
+      }
+    }
+    
+    resultats.grup_experimental = grupAssignat;
+    document.getElementById('imatge_estimul').src = imatgeUrl;
+    mostrarSeccio('seccio3_estimul');
+  }
+
+  // ENVIAMENT FINAL
+  function finalitzarExperiment() {
+    var btn = document.getElementById('btn_finalitzar');
+    var form = document.getElementById('form_seccio6');
+
+    // 1. Desactivem i informem
+    btn.disabled = true;
+    btn.innerHTML = "Enviant... Si us plau, no tanquis la finestra.";
+
+    // 2. Missatge d'espera
+    var p_espera = document.createElement('p');
+    p_espera.id = 'msg_espera';
+    p_espera.innerHTML = "<em>(Això pot trigar uns segons...)</em>";
+    p_espera.style.textAlign = "center";
+    form.appendChild(p_espera);
+
+    // 3. Enviament al servidor
+    google.script.run
+      .withSuccessHandler(function(resposta) {
+        mostrarSeccio('seccio_gracies');
+      })
+      .withFailureHandler(function(error) {
+        alert("Error en l'enviament: " + error.message);
+        btn.disabled = false;
+        btn.innerHTML = "Finalitzar i Enviar Dades";
+        if(document.getElementById('msg_espera')) form.removeChild(p_espera);
+      })
+      .saveData(resultats);
+  }
+</script>
