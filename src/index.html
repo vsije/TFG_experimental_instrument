@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    
+    <style>
+      /* ===== CONFIGURACIÓ GLOBAL I COLORS ===== */
+      :root {
+        --color-primari: #4f46e5;
+        --color-primari-fosc: #4338ca;
+        --color-text: #000000;
+        --color-fons: #eeeeee;
+        --color-blanc: #ffffff;
+        --color-gris-text: #555;
+        --color-gris-boto-disabled: #c7c7c7;
+        --ombra-targeta: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --radi-targeta: 12px;
+        --radi-boto: 8px;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--color-fons);
+        color: var(--color-text);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+
+      /* ===== ESTRUCTURA DE LA TARGETA (CARD) ===== */
+      .seccio {
+        display: none;
+        background-color: var(--color-blanc);
+        border-radius: var(--radi-targeta);
+        box-shadow: var(--ombra-targeta);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 800px;
+        box-sizing: border-box;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+      }
+      
+      @media (max-width: 600px) {
+        body { padding: 10px; }
+        .seccio { padding: 1.5rem; margin-top: 1rem; }
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.2rem; }
+      }
+      
+      #seccio1_consentiment { display: block; }
+      #seccio_gracies { text-align: center; }
+
+      /* ===== TIPOGRAFIA ===== */
+      h1, h2, h3 { color: var(--color-text); font-weight: 700; line-height: 1.3; }
+      h1 { font-size: 2rem; margin-top: 0; margin-bottom: 1rem; }
+      h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid var(--color-fons); padding-bottom: 10px; }
+      h3 { font-size: 1.2rem; color: var(--color-primari); margin-top: 1.5rem;}
+      p, label { line-height: 1.6; font-size: 1rem; }
+      small { color: var(--color-gris-text); line-height: 1.5; display: inline-block; margin-top: -5px; }
+      hr { border: none; border-top: 1px solid var(--color-fons); margin: 2rem 0; }
+      ul { padding-left: 20px; }
+      li { margin-bottom: 10px; }
+
+      /* ===== BOTONS "PRO" ===== */
+      button {
+        background-color: var(--color-primari);
+        color: var(--color-blanc);
+        border: none;
+        border-radius: var(--radi-boto);
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        width: 100%;
+        max-width: 300px;
+        display: block;
+        margin: 20px auto 0;
+      }
+      button:hover { background-color: var(--color-primari-fosc); }
+      button:active { transform: scale(0.98); }
+      button:disabled { background-color: var(--color-gris-boto-disabled); cursor: not-allowed; }
+
+      /* ===== FORMULARIS "PRO" ===== */
+      .pregunta { margin-bottom: 25px; }
+      input[type="number"], input[type="text"], select, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: var(--radi-boto);
+        font-size: 1rem;
+        box-sizing: border-box; 
+        margin-top: 5px;
+      }
+      input[type="text"], textarea { width: 100% !important; }
+      textarea { min-height: 100px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto; }
+      
+      input[type="checkbox"], input[type="radio"] {
+        accent-color: var(--color-primari);
+        transform: scale(1.2);
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      label { display: inline-block; margin-bottom: 5px; vertical-align: middle; }
+      input[type="range"] { width: 100%; accent-color: var(--color-primari); }
+      output { font-weight: 600; color: var(--color-primari); }
+
+      /* ===== TOOLTIPS ===== */
+      .tooltip-container {
+        position: relative;
+        display: inline-block;
+        cursor: help;
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .tooltip-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: var(--color-fons);
+        color: var(--color-primari);
+        font-weight: bold;
+        font-size: 12px;
+        font-family: monospace;
+        border: 1px solid var(--color-primari);
+      }
+      .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 8px;
+        position: absolute;
+        z-index: 100;
+        bottom: 135%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        pointer-events: none;
+      }
+      .tooltip-container:hover .tooltip-text,
+      .tooltip-container:active .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      /* ===== NOUS ESTILS LIKERT (STIL GOOGLE FORMS / MÒBIL FRIENDLY) ===== */
+      .likert-container {
+        background-color: #f9fafb; /* Fons molt suau */
+        padding: 15px;
+        border-radius: var(--radi-boto);
+        margin-bottom: 20px;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .likert-question {
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: block;
+        color: var(--color-text);
+      }
+      
+      /* Etiquetes extrems (Desacord ... D'acord) */
+      .likert-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--color-gris-text);
+        margin-bottom: 10px;
+        font-weight: 500;
+      }
+      
+      /* Contenidor dels cercles */
+      .likert-options {
+        display: flex;
+        justify-content: space-between; /* Es reparteixen l'espai */
+        align-items: center;
+      }
+      
+      /* El contenidor de cada opció (input + cercle) */
+      .likert-option {
+        text-align: center;
+        flex: 1; /* Tots ocupen el mateix */
+        position: relative;
+      }
+      
+      /* Amaguem el radio button lleig per defecte */
+      .likert-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        margin: 0;
+        z-index: 2; /* Perquè sigui clicable per sobre de tot */
+      }
+      
+      /* Dibuixem el cercle */
+      .likert-circle {
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        display: block;
+        margin: 0 auto;
+        font-weight: bold;
+        color: #374151;
+        transition: all 0.2s;
+      }
+      
+      /* Quan es selecciona (CHECKED) */
+      .likert-option input[type="radio"]:checked + .likert-circle {
+        background-color: var(--color-primari);
+        color: #fff;
+        border-color: var(--color-primari);
+        transform: scale(1.1);
+        box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+      }
+      
+      /* Petit número a sota (opcional, per reforçar en mòbil) */
+      .likert-number-label {
+        font-size: 0.7rem;
+        color: #9ca3af;
+        margin-top: 4px;
+        display: block;
+      }
+
+      /* Ajustos per a mòbils molt petits */
+      @media (max-width: 400px) {
+        .likert-circle {
+          width: 28px;
+          height: 28px;
+          line-height: 28px;
+          font-size: 0.9rem;
+        }
+      }
+      
+      /* 1a Columna (Text Pregunta) */
+      /* Sense 'sticky' per evitar problemes de bloqueig tàctil */
+      td:first-child, th:first-child {
+        text-align: left;
+        font-weight: 500;
+        width: 30%; /* Reduït al 30% perquè es vegin els botons al costat */
+        min-width: 180px; 
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      
+      /* Columnes de números */
+      th:not(:first-child), td:not(:first-child) {
+        width: 10%; /* (100 - 30) / 7 = 10% */
+      }
+      td:not(:first-child) input[type="radio"] {
+        margin: 0 auto;
+        display: block;
+        width: 20px;
+        height: 20px;
+      }
+
+      /* Files separadores (Educació/Immigració) */
+      tr td[colspan="8"] {
+        background-color: #f3f4f6 !important;
+        color: var(--color-primari);
+        font-weight: 700;
+        text-align: left;
+        padding: 15px 10px;
+      }
+
+      /* ===== IMATGES ===== */
+      .visualitzacio-imatge {
+        max-width: 100%; 
+        height: auto;
+        border-radius: var(--radi-boto); 
+        border: 1px solid var(--color-fons); 
+        box-sizing: border-box; 
+      }
+      .icona-final {
+        width: 100px;
+        height: auto;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+    </style>
+    
+    <?!= HtmlService.createHtmlOutputFromFile('Imatges').getContent(); ?>
+    <?!= HtmlService.createHtmlOutputFromFile('JavaScript').getContent(); ?>
+
+  </head>
+  <body>
+
+    <div id="seccio1_consentiment" class="seccio">
+      <h1 style="color: var(--color-primari);">Hola! 👋🏽</h1>
+      
+      <p>Moltes gràcies per dedicar uns minuts a col·laborar amb aquesta recerca.</p>
+      <p>Et convido a participar en un estudi acadèmic que forma part del meu Treball Final de Grau en Ciència de Dades Aplicada a la Universitat Oberta de Catalunya (UOC). L’objectiu és entendre millor com les persones interpretem la informació visual quan aquesta es presenta en forma de gràfics.</p>
+
+      <h2>Com protegim les teves dades?</h2>
+      <p>Aquest estudi segueix un protocol estricte de Privadesa des del Disseny. Això implica que:</p>
+      <ul>
+        <li><strong>Anonimat Tècnic Total:</strong> El sistema no registra cap dada que permeti identificar-te personalment. No es guarda la teva adreça IP, ni cap informació vinculada al teu compte de Google, ni cap altre identificador.</li>
+        <li><strong>Ús exclusiu per a anàlisi estadística:</strong> Les respostes es tractaran únicament de manera agregada amb finalitats de recerca. Cap dada individual serà analitzada o publicada.</li>
+        <li><strong>Confidencialitat garantida:</strong> La infraestructura tècnica utilitzada (tecnologia de Google) opera dins d’aquest marc d'anonimat estricte.</li>
+      </ul>
+
+      <h2>Què hauràs de fer?</h2>
+      <p>La participació és breu (aproximadament entre 5 i 10 minuts) i consta de tres parts:</p>
+      <ul>
+        <li>Respondre unes preguntes generals.</li>
+        <li>Visualitzar un gràfic sobre un tema d’actualitat.</li>
+        <li>Indicar la teva opinió sobre allò que has vist.</li>
+      </ul>
+      
+
+      <h2>Participació voluntària</h2>
+      <p>La participació és completament voluntària. Pots abandonar l’estudi en qualsevol moment simplement tancant la finestra del navegador. Si ho fas abans d’enviar les respostes finals, no es registrarà cap dada.</p>
+      
+      <hr>
+      
+      <h2>Declaració de Consentiment</h2>
+      <p>He llegit la informació proporcionada, entenc les garanties de confidencialitat i accepto participar-hi voluntàriament.</p>
+      <div class="pregunta">
+        <input type="checkbox" id="consentiment_check" onchange="document.getElementById('btn_s1').disabled = !this.checked;">
+        <label for="consentiment_check"><b>He llegit la informació, entenc les garanties i accepto participar-hi voluntàriament.</b></label>
+      </div>
+      <button id="btn_s1" onclick="mostrarSeccio('seccio2_pretest')" disabled>Continuar</button>
+    </div>
+
+    <div id="seccio2_pretest" class="seccio">
+      <form id="form_seccio2">
+        <h1 style="color: var(--color-primari);">Una mica sobre tu</h1>
+        <p>Abans de començar l’exercici visual, necessitem algunes dades bàsiques per contextualitzar els resultats. El qüestionari és totalment anònim i no existeixen respostes correctes o incorrectes.</p>
+        
+        <div class="pregunta">
+          <label for="s2_edat">1. Quants anys tens? <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Camp numèric. Escriu la teva edat.</span></span></label><br>
+          <input type="number" id="s2_edat" name="s2_edat" min="18" max="100" required placeholder="Ex: 25">
+        </div>
+
+        <div class="pregunta">
+          <label>2. Sexe: <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Dada per veure si hi ha diferències biològiques en la percepció visual.</span></span></label><br>
+          <input type="radio" id="s2_sexe_home" name="s2_sexe" value="home" required> <label for="s2_sexe_home">Home</label><br>
+          <input type="radio" id="s2_sexe_dona" name="s2_sexe" value="dona"> <label for="s2_sexe_dona">Dona</label><br>
+          <input type="radio" id="s2_sexe_pnc" name="s2_sexe" value="pnc"> <label for="s2_sexe_pnc">Prefereixo no contestar</label>
+        </div>
+
+        <div class="pregunta">
+          <label for="s2_estudis">3. Quin és el teu nivell d'estudis? <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Tria l'opció més alta completada.</span></span></label><br>
+          <select id="s2_estudis" name="s2_estudis" required>
+            <option value="" disabled selected>-- Selecciona una opció --</option>
+            <option value="sense_estudis">Sense estudis o primaris</option>
+            <option value="secundaris">Secundaris (ESO, Batxillerat, CFGM, CFGS)</option>
+            <option value="superiors">Superiors (Diplomatura, Llicenciatura, Grau universitari)</option>
+            <option value="postgrau">Postgrau (Màster, Doctorat)</option>
+          </select>
+        </div>
+
+        <div class="pregunta">
+          <label for="s2_ideologia">4. Orientació política.</label>
+          <p style="margin-top:0; font-size: 0.95rem; color: #555;">A continuació t’agrairem que indiquis la teva orientació política general, una variable utilitzada habitualment en estudis d’opinió pública. En una escala de l’1 (esquerra) al 10 (dreta), on t’ubicaries?</p>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;"><span>1 (Esquerra)</span><span>10 (Dreta)</span></div>
+          <input type="range" id="s2_ideologia" name="s2_ideologia" min="1" max="10" step="1" oninput="outputIdeologia.value = s2_ideologia.value">
+          <div style="text-align: center; margin-top: 5px;">Posició seleccionada: <output id="outputIdeologia" name="outputIdeologia" for="s2_ideologia">5</output></div>
+          <div style="margin-top: 10px;">
+            <input type="checkbox" id="s2_ideologia_nsc" name="s2_ideologia_nsc"> <label for="s2_ideologia_nsc">No ho sé / No m'identifico</label>
+          </div>
+        </div>
+
+        <hr>
+
+        <h2 style="border-bottom: none;">La teva opinió sobre l'actualitat</h2>
+        <p>Volem conèixer el teu punt de vista sobre dos temes freqüents al debat públic: l'<strong>Educació</strong> i la <strong>Immigració</strong>.</p>
+        <p>Indica el teu grau d'acord amb les següents frases: <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">1 = Totalment en desacord ... 7 = Totalment d'acord</span></span></p>
+
+        <h3 style="margin-top:30px; border-bottom: 2px solid #eee; padding-bottom:5px; color: var(--color-primari);">Sobre Educació i Inversió Pública</h3>
+        
+        <div class="likert-container">
+          <span class="likert-question">5. Crec que la inversió en educació a Espanya ha patit un retrocés preocupant en els últims anys.</span>
+          <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+          <div class="likert-options">
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio1" value="1" required><span class="likert-circle">1</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio1" value="2"><span class="likert-circle">2</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio1" value="3"><span class="likert-circle">3</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio1" value="4"><span class="likert-circle">4</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio1" value="5"><span class="likert-circle">5</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio1" value="6"><span class="likert-circle">6</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio1" value="7"><span class="likert-circle">7</span></div>
+          </div>
+        </div>
+
+        <div class="likert-container">
+          <span class="likert-question">6. Considero que l'esforç pressupostari actual en educació és suficient per mantenir la qualitat del sistema.</span>
+          <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+          <div class="likert-options">
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio2" value="1" required><span class="likert-circle">1</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio2" value="2"><span class="likert-circle">2</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio2" value="3"><span class="likert-circle">3</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio2" value="4"><span class="likert-circle">4</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio2" value="5"><span class="likert-circle">5</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio2" value="6"><span class="likert-circle">6</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_educacio2" value="7"><span class="likert-circle">7</span></div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:30px; border-bottom: 2px solid #eee; padding-bottom:5px; color: var(--color-primari);">Sobre Demografia i Societat</h3>
+
+        <div class="likert-container">
+          <span class="likert-question">7. L'arribada de població estrangera és, en general, positiva per a l'economia i la cultura del país.</span>
+          <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+          <div class="likert-options">
+            <div class="likert-option"><input type="radio" name="s2_likert_immi1" value="1" required><span class="likert-circle">1</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi1" value="2"><span class="likert-circle">2</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi1" value="3"><span class="likert-circle">3</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi1" value="4"><span class="likert-circle">4</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi1" value="5"><span class="likert-circle">5</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi1" value="6"><span class="likert-circle">6</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi1" value="7"><span class="likert-circle">7</span></div>
+          </div>
+        </div>
+
+        <div class="likert-container">
+          <span class="likert-question">8. Un volum elevat d'immigració pot generar problemes de cohesió social o saturar els serveis públics.</span>
+          <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+          <div class="likert-options">
+            <div class="likert-option"><input type="radio" name="s2_likert_immi2" value="1" required><span class="likert-circle">1</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi2" value="2"><span class="likert-circle">2</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi2" value="3"><span class="likert-circle">3</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi2" value="4"><span class="likert-circle">4</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi2" value="5"><span class="likert-circle">5</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi2" value="6"><span class="likert-circle">6</span></div>
+            <div class="likert-option"><input type="radio" name="s2_likert_immi2" value="7"><span class="likert-circle">7</span></div>
+          </div>
+        </div>
+        
+        <br>
+        <button type="button" onclick="validarIContinuarS2()">Següent</button>
+      </form>
+    </div>
+
+    <div id="seccio3_estimul" class="seccio">
+      <h2 style="color: var(--color-primari);">Visualització</h2>
+      <p>Si us plau, observa el següent gràfic amb atenció.</p>
+      <div class="pregunta" style="text-align: center;">
+        <img id="imatge_estimul" src="" alt="Visualització de dades" class="visualitzacio-imatge">
+      </div>
+      <br>
+      <button type="button" onclick="prepararIContinuarS3()">Següent</button>
+    </div>
+
+    <div id="seccio4_posttest" class="seccio">
+      
+      <h1 style="color: var(--color-primari);">La teva impressió sobre el gràfic</h1>
+      <p>Ara ens agradaria saber què has interpretat de la visualització i quina sensació t'ha transmès.</p>
+
+      <div id="posttest_bloc_educacio" style="display: none;">
+        <form id="form_seccio4_educacio">
+          
+          <h3>Part A: Comprovació de lectura <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Per assegurar-nos que el gràfic s'ha entès bé. No és una trampa!</span></span></h3>
+          
+          <div class="pregunta">
+            <label>9. Segons el gràfic que has vist, quin any es va registrar el pic més alt de despesa en educació?</label><br>
+            
+            <input type="radio" id="s4_comp_edu_2015" name="s4_comp_educacio" value="2015" required> <label for="s4_comp_edu_2015">2015</label><br>
+            <input type="radio" id="s4_comp_edu_2016" name="s4_comp_educacio" value="2016"> <label for="s4_comp_edu_2016">2016</label><br>
+            <input type="radio" id="s4_comp_edu_2017" name="s4_comp_educacio" value="2017"> <label for="s4_comp_edu_2017">2017</label><br>
+            <input type="radio" id="s4_comp_edu_2018" name="s4_comp_educacio" value="2018"> <label for="s4_comp_edu_2018">2018</label><br>
+            <input type="radio" id="s4_comp_edu_2019" name="s4_comp_educacio" value="2019"> <label for="s4_comp_edu_2019">2019</label><br>
+            <input type="radio" id="s4_comp_edu_2020" name="s4_comp_educacio" value="2020"> <label for="s4_comp_edu_2020">2020</label><br>
+            <input type="radio" id="s4_comp_edu_2021" name="s4_comp_educacio" value="2021"> <label for="s4_comp_edu_2021">2021</label><br>
+            <input type="radio" id="s4_comp_edu_2022" name="s4_comp_educacio" value="2022"> <label for="s4_comp_edu_2022">2022</label><br>
+            <input type="radio" id="s4_comp_edu_2023" name="s4_comp_educacio" value="2023"> <label for="s4_comp_edu_2023">2023</label><br>
+            <input type="radio" id="s4_comp_edu_nsnc" name="s4_comp_educacio" value="nsnc"> <label for="s4_comp_edu_nsnc">No ho recordo</label>
+          </div>
+          <hr>
+
+          <h3>Part B: La teva percepció personal <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Fes cas al teu instint! No analitzis, només digues què sents.</span></span></h3>
+
+          <div class="likert-container">
+            <span class="likert-question">10. Sincerament, el gràfic t'ha semblat clar i fàcil d'entendre?</span>
+            <div class="likert-labels"><span>Gens clar</span><span>Molt clar</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_claredat" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_claredat" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_claredat" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_claredat" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_claredat" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_claredat" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_claredat" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <div class="likert-container">
+            <span class="likert-question">11. En quina mesura t'ha inspirat confiança la informació presentada?</span>
+            <div class="likert-labels"><span>Gens de confiança</span><span>Total confiança</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_confianca" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_confianca" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_confianca" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_confianca" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_confianca" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_confianca" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_educacio_confianca" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <div class="pregunta">
+            <label for="s4_percep_educacio_paraules">12. Quines 3 paraules et venen al cap per descriure la situació que mostra el gràfic?</label><br>
+            <small>(Escriu el primer que pensis. Ex: "preocupant", "normal", "estable", "crisi"...)</small><br>
+            <input type="text" id="s4_percep_educacio_paraules" name="s4_percep_educacio_paraules" required>
+          </div>
+
+          <hr>
+
+          <h3>Part C: La teva opinió ara <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Et tornem a fer les mateixes preguntes que al principi. No miris enrere! Volem saber què penses ara mateix.</span></span></h3>
+
+          <div class="likert-container">
+            <span class="likert-question">13. Crec que la inversió en educació a Espanya ha patit un retrocés preocupant en els últims anys.</span>
+            <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_post_educacio1" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio1" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio1" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio1" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio1" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio1" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio1" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <div class="likert-container">
+            <span class="likert-question">14. Considero que l'esforç pressupostari actual en educació és suficient per mantenir la qualitat del sistema.</span>
+            <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_post_educacio2" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio2" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio2" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio2" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio2" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio2" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_educacio2" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <br>
+          <button type="button" onclick="validarIContinuarS4()">Següent</button>
+        </form>
+      </div>
+
+
+      <div id="posttest_bloc_immi" style="display: none;">
+        <form id="form_seccio4_immi">
+          
+          <h3>Part A: Comprovació de lectura <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Per assegurar-nos que el mapa s'ha entès bé. No és una trampa!</span></span></h3>
+
+         <div class="pregunta">
+            <label>9. Segons el mapa que acabes de veure, on es concentra principalment la població estrangera?</label><br>
+            
+            <input type="radio" id="s4_comp_immi_centre" name="s4_comp_immi" value="centre" required> 
+            <label for="s4_comp_immi_centre">Al centre peninsular</label><br>
+            
+            <input type="radio" id="s4_comp_immi_costa" name="s4_comp_immi" value="costa"> 
+            <label for="s4_comp_immi_costa">A la costa mediterrània i les illes</label><br>
+            
+            <input type="radio" id="s4_comp_immi_portugal" name="s4_comp_immi" value="portugal"> 
+            <label for="s4_comp_immi_portugal">A la frontera amb Portugal</label><br>
+            
+            <input type="radio" id="s4_comp_immi_cantabric" name="s4_comp_immi" value="cantabric"> 
+            <label for="s4_comp_immi_cantabric">A la costa cantàbrica</label><br>
+            
+            <input type="radio" id="s4_comp_immi_uniforme" name="s4_comp_immi" value="uniforme"> 
+            <label for="s4_comp_immi_uniforme">La distribució és uniforme</label><br>
+            
+            <input type="radio" id="s4_comp_immi_nsnc" name="s4_comp_immi" value="nsnc"> 
+            <label for="s4_comp_immi_nsnc">No ho recordo</label>
+          </div>
+          <hr>
+
+          <h3>Part B: La teva percepció personal <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Fes cas al teu instint! No analitzis, només digues què sents.</span></span></h3>
+
+          <div class="likert-container">
+            <span class="likert-question">10. Sincerament, el gràfic t'ha semblat clar i fàcil d'entendre?</span>
+            <div class="likert-labels"><span>Gens clar</span><span>Molt clar</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_claredat" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_claredat" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_claredat" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_claredat" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_claredat" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_claredat" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_claredat" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <div class="likert-container">
+            <span class="likert-question">11. En quina mesura t'ha inspirat confiança la informació presentada?</span>
+            <div class="likert-labels"><span>Gens de confiança</span><span>Total confiança</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_confianca" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_confianca" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_confianca" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_confianca" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_confianca" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_confianca" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_percep_immi_confianca" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <div class="pregunta">
+            <label for="s4_percep_immi_paraules">12. Quines 3 paraules et venen al cap per descriure la situació que mostra el gràfic?</label><br>
+            <small>(Escriu el primer que pensis. Ex: "preocupant", "normal", "estable", "crisi"...)</small><br>
+            <input type="text" id="s4_percep_immi_paraules" name="s4_percep_immi_paraules" required>
+          </div>
+
+          <hr>
+
+          <h3>Part C: La teva opinió ara <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Et tornem a fer les mateixes preguntes que al principi. No miris enrere! Volem saber què penses ara mateix.</span></span></h3>
+
+          <div class="likert-container">
+            <span class="likert-question">13. L'arribada de població estrangera és, en general, positiva per a l'economia i la cultura del país.</span>
+            <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_post_immi1" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi1" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi1" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi1" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi1" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi1" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi1" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <div class="likert-container">
+            <span class="likert-question">14. Un volum elevat d'immigració pot arribar a saturar els serveis públics i generar conflictes de convivència.</span>
+            <div class="likert-labels"><span>Totalment en desacord</span><span>Totalment d'acord</span></div>
+            <div class="likert-options">
+              <div class="likert-option"><input type="radio" name="s4_post_immi2" value="1" required><span class="likert-circle">1</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi2" value="2"><span class="likert-circle">2</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi2" value="3"><span class="likert-circle">3</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi2" value="4"><span class="likert-circle">4</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi2" value="5"><span class="likert-circle">5</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi2" value="6"><span class="likert-circle">6</span></div>
+              <div class="likert-option"><input type="radio" name="s4_post_immi2" value="7"><span class="likert-circle">7</span></div>
+            </div>
+          </div>
+
+          <br>
+          <button type="button" onclick="validarIContinuarS4()">Següent</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="seccio5_memoria" class="seccio">
+      <form id="form_seccio5">
+        <h1 style="color: var(--color-primari);">Un repte de memòria 🧠</h1>
+        <p>Ja gairebé hem acabat. Ara, deixem descansar les dades. Sense mirar enrere, ens agradaria saber què ha retingut el teu cervell d'aquella imatge.</p>
+        <div class="pregunta">
+          <label for="s5_record_tema">15. Si haguessis d'explicar a un amic el missatge principal del gràfic en una sola frase, què li diries? <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">No cal que sigui tècnic. Simplement, quina conclusió n'has tret?</span></span></label><br>
+          <textarea id="s5_record_tema" name="s5_record_tema" rows="4" required placeholder="Li diria que..."></textarea>
+        </div>
+        <div class="pregunta">
+          <label for="s5_record_visual">16. Tanca els ulls un moment. Hi ha algun element visual concret que se t'hagi quedat gravat? <span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">Pot ser un color intens, una línia que pujava o baixava molt, una xifra sorprenent... o potser res en especial.</span></span></label><br>
+          <textarea id="s5_record_visual" name="s5_record_visual" rows="4" required placeholder="Recordo especialment..."></textarea>
+        </div>
+        <br>
+        <button type="button" onclick="validarIContinuarS5()">Següent</button>
+      </form>
+    </div>
+
+    <div id="seccio6_debriefing" class="seccio">
+  <form id="form_seccio6">
+    <h1 style="color: var(--color-primari);">Abans d’acabar… un aclariment</h1>
+    <p>Has arribat al final de l’estudi. Gràcies per la teva participació.</p>
+    <hr>
+    
+    <h2>Debriefing: quin era l’objectiu real de l’estudi?</h2>
+    <p>Al començament hem explicat que volíem analitzar la “percepció visual”. Ara que ja has completat el qüestionari, et facilitem una informació més precisa sobre el propòsit de la recerca.</p>
+    <p>L’estudi té per objectiu examinar fins a quin punt determinats elements de disseny gràfic poden influir en la interpretació o percepció d’un gràfic sense que en siguem plenament conscients.</p>
+    
+    <ul>
+      <li><strong>Procediment experimental:</strong> Has estat assignat/da aleatòriament a un grup. Segons el grup, és possible que hagis visualitzat un gràfic neutre o bé un gràfic amb petites variacions de disseny (com canvis en el color, la forma o l’escala).</li>
+      <li><strong>Finalitat:</strong> L’objectiu no era enganyar-te, sinó avaluar si aquests ajustos visuals tenen algun efecte en la manera com interpretem la informació. Les teves respostes contribuiran a fomentar pràctiques de visualització més ètiques, transparents i responsables.</li>
+    </ul>
+    
+    <h2>Protecció de dades</h2>
+    <p>Les teves respostes han estat anonimitzades i s’analitzaran exclusivament de manera agregada juntament amb les de la resta de participants, amb la finalitat d’obtenir conclusions generals.</p>
+    
+    <hr>
+    <h2>Pas final</h2>
+    <p>Si us plau, prem el botó "Finalitzar" aquí sota per enviar les teves respostes i tancar l’estudi.</p>
+    
+    <br>
+    <button type="button" id="btn_finalitzar" onclick="finalitzarExperiment()">Finalitzar i Enviar</button>
+  </form>
+</div>
+
+    <div id="seccio_gracies" class="seccio">
+      
+      <img src="data:image/png;base64,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" class="icona-final" alt="Somriure">
+      
+      <h2 style="margin-top:20px;">👩🏽‍💻​Tot llest! Dades rebudes.</h2>
+      <p>Les teves respostes s'han enviat correctament i de forma segura.</p>
+      <p>Moltes gràcies per col·laborar amb aquesta recerca. La teva contribució és essencial per promoure un disseny d'informació més ètic i transparent.</p>
+      <p style="color:#777; margin-top:30px;">Ja pots tancar aquesta finestra o pestanya del navegador.</p>
+    </div>
+
+  </body>
+</html>
+
+
